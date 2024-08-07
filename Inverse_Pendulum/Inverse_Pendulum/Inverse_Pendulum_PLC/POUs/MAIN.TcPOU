@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{3ed1aa7e-7f41-4725-b882-9858b51c591a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	fInputForce : LREAL := 0.0;
+	fX_SP : LREAL := 0.0;
+	fThetaSP : LREAL := 0.0;
+	
+	bHMI_ForceStateVariables : BOOL := FALSE;
+	stHMI_ForcedStateVariables : ST_StateVariables;
+	stStateVariables : ST_StateVariables;
+	
+	//Initialize simulator
+	stInitialStateVariables : ST_StateVariables := (fX := 0.0, fXD := 0.0, fTheta := 0.000, fThetaD := 0.0);
+	fbInvertedPendulum : FB_InvertedPendulum(
+		fMassPendulum := 1.0, 
+		fMassCart := 3.0, 
+		fLengthPendulum := 0.5, 
+		stInitialStateVariables := stInitialStateVariables,
+		nCycleTimeMs:= 1);
+		
+	//PID Controller for X (Outer loop)
+		stPID_X_settings : ST_CTRL_PID_PARAMS := (
+		tCtrlCycleTime := T#10MS,
+		tTaskCycleTime := T#1MS, 
+		fKp := 0.2,  	 //P
+		tTn := T#0MS,//I
+		tTv := T#200MS,//D
+		tTd := T#0MS,//Derivator filter
+		fOutMaxLimit := 0.2,
+		fOutMinLimit := -0.2,
+		bPInTheFeedbackPath := FALSE,
+		bDInTheFeedbackPath := FALSE,
+		bARWOnIPartOnly := FALSE);
+	fbPID_X : FB_CTRL_PID;
+	
+
+	//PID Controller for theta (Inner loop)
+	stPID_settings : ST_CTRL_PID_PARAMS := (
+		tCtrlCycleTime := T#1MS, 
+		tTaskCycleTime := T#1MS, 
+		fKp := 200,  //P
+		tTn := T#0MS,//I
+		tTv := T#40MS,//D
+		tTd := T#0MS,//Derivator filter
+		fOutMaxLimit := 100,
+		fOutMinLimit := -100,
+		bPInTheFeedbackPath := FALSE,
+		bDInTheFeedbackPath := FALSE,
+		bARWOnIPartOnly := FALSE);
+	fbPID : FB_CTRL_PID;
+	
+	fHMI_positionScale : LREAL; //scaling the displacement of the cart in HMI. There is probably a better way to do this.
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stStateVariables := fbInvertedPendulum.Simulate(fForce := fInputForce);
+
+fbPID_X(
+	fSetpointValue := fX_SP, 
+	fActualValue := stStateVariables.fX, 
+	eMode := eCTRL_MODE_ACTIVE, 
+	stParams := stPID_X_settings);
+	fThetaSP := fbPID_X.fOut;
+
+fbPID(
+	fSetpointValue := fThetaSP, 
+	fActualValue := stStateVariables.fTheta, 
+	eMode := eCTRL_MODE_ACTIVE, 
+	stParams := stPID_settings);
+	fInputForce := fbPID.fOut*-1;
+
+IF bHMI_ForceStateVariables THEN
+	fbInvertedPendulum.ForceStateVariables(stNewStateVariables := stHMI_ForcedStateVariables);
+	bHMI_ForceStateVariables := FALSE;
+END_IF
+
+fHMI_positionScale := stStateVariables.fX * 200;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

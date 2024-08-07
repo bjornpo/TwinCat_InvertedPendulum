@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_InvertedPendulum" Id="{e8468085-4eb3-48df-810a-3f500f10046f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_InvertedPendulum
+VAR
+	stStateVariables : ST_StateVariables;
+	fXDD : LREAL;	//[m/s^2] Acceleratiomn of cart
+	fThetaDD : LREAL;	//[rad/s^2] Angular acceleration Pendulum
+	fMp : LREAL; 		//[kg] Mass of pendulum
+	fMc : LREAL; 		//[kg] Mass of cart
+	fL : LREAL;  		//[m] Length of pendulum
+	fCycleTimeSeconds : LREAL;
+END_VAR
+
+VAR CONSTANT
+	fG : LREAL := 9.81; //[m/s^2] Gravity
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{7369e476-ab4b-4d6f-9956-d0b094a0dd9f}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	fMassPendulum : LREAL; 
+	fMassCart : LREAL; 
+	fLengthPendulum : LREAL; 
+	stInitialStateVariables : ST_StateVariables;
+	nCycleTimeMs : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fMp := fMassPendulum;
+fMc := fMassCart;
+fL := fLengthPendulum;
+fCycleTimeSeconds := nCycleTimeMs / 1000.0;
+stStateVariables := stInitialStateVariables;
+FB_Init := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ForceStateVariables" Id="{39d30817-13de-48f8-b4da-5942cc79c742}">
+      <Declaration><![CDATA[METHOD PUBLIC ForceStateVariables
+VAR_INPUT
+	stNewStateVariables: ST_StateVariables;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stStateVariables := stNewStateVariables;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Simulate" Id="{b49ddc26-da3d-4dc4-be56-40542048df5f}">
+      <Declaration><![CDATA[METHOD PUBLIC Simulate : ST_StateVariables
+VAR
+	fCosTheta : LREAL;
+	fSinTheta : LREAL;
+END_VAR
+
+VAR_INPUT
+	fForce : LREAL; //[N]
+END_VAR
+
+VAR_OUTPUT
+	stStateVariablesOutput : ST_StateVariables;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fCosTheta := COS(stStateVariables.fTheta);
+fSinTheta := SIN(stStateVariables.fTheta);
+
+fXDD := (fForce 
+		+ fMp * fL * fSinTheta* stStateVariables.fThetaD * stStateVariables.fThetaD  
+		- fMp * fG * fCosTheta * fSinTheta) 
+		/(fMp + fMc - fMp * fCosTheta *fCosTheta);
+		
+fThetaDD := (fG * fSinTheta / fL)
+			- (fForce * fCosTheta 
+			+ fMp * fL * fSinTheta * fCosTheta * stStateVariables.fThetaD * stStateVariables.fThetaD
+			- fMp * fG * fCosTheta*fCosTheta*fSinTheta)
+			/ (fL * (fMp + fMc - fMp * fCosTheta * fCosTheta));
+
+			
+//Time integration
+stStateVariables.fX := stStateVariables.fX + stStateVariables.fXD * fCycleTimeSeconds;
+stStateVariables.fXD := stStateVariables.fXD + fXDD * fCycleTimeSeconds;
+
+stStateVariables.fTheta := stStateVariables.fTheta + stStateVariables.fThetaD * fCycleTimeSeconds;
+stStateVariables.fThetaD := stStateVariables.fThetaD + fThetaDD * fCycleTimeSeconds;
+
+Simulate := stStateVariables;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

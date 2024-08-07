@@ -1,0 +1,40 @@
+{
+    "commitInterval": "PT10S",
+    "enableBackup": false,
+    "historizedSymbolList": {
+        "PLC1.MAIN.fInputForce": {
+            "interval": "PT0.01S",
+            "maxEntries": 10000,
+            "recordingEnabled": true,
+            "rowLimit": 100000
+        },
+        "PLC1.MAIN.stStateVariables.fTheta": {
+            "interval": "PT0.01S",
+            "maxEntries": 10000,
+            "recordingEnabled": true,
+            "rowLimit": 100000
+        },
+        "PLC1.MAIN.stStateVariables.fThetaD": {
+            "interval": "PT0.01S",
+            "maxEntries": 10000,
+            "recordingEnabled": true,
+            "rowLimit": 100000
+        },
+        "PLC1.MAIN.stStateVariables.fX": {
+            "interval": "PT0.01S",
+            "maxEntries": 10000,
+            "recordingEnabled": true,
+            "rowLimit": 100000
+        },
+        "PLC1.MAIN.stStateVariables.fXD": {
+            "interval": "PT0.01S",
+            "maxEntries": 10000,
+            "recordingEnabled": true,
+            "rowLimit": 100000
+        }
+    },
+    "inMemory": true,
+    "maxBackups": 1,
+    "mode": 3,
+    "vacuumOnStartup": false
+}
