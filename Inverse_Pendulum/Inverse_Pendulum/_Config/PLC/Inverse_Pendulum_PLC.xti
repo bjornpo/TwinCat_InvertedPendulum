@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.35" ClassName="CNestedPlcProjDef">
 	<Project GUID="{2DCC2B5B-FC39-48ED-B622-390DF0B806DE}" Name="Inverse_Pendulum_PLC" PrjFilePath="..\..\Inverse_Pendulum_PLC\Inverse_Pendulum_PLC.plcproj" TmcFilePath="..\..\Inverse_Pendulum_PLC\Inverse_Pendulum_PLC.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Inverse_Pendulum_PLC\Inverse_Pendulum_PLC.tmc" TmcHash="{63209F08-43A2-7984-3AAA-5151AB8FB2D1}">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Inverse_Pendulum_PLC\Inverse_Pendulum_PLC.tmc" TmcHash="{B3C9B808-820A-67D0-4F0B-4B594FEF1067}">
 			<Name>Inverse_Pendulum_PLC Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Contexts>

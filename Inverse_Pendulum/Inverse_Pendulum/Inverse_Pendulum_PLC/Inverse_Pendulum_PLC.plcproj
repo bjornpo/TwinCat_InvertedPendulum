@@ -17,6 +17,9 @@
     <LibraryReferences>{eaa62ec2-9dbb-419b-aee5-e8a65a7a1438}</LibraryReferences>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\E_RegulatorMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\ST_StateVariables.TcDUT">
       <SubType>Code</SubType>
     </Compile>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_RegulatorMode" Id="{58f30ffc-65e3-46c2-a2e2-aea0c4b7c186}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_RegulatorMode :
+(
+	eDisabled,
+	ePID,
+	eCascade
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

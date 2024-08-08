@@ -27,7 +27,35 @@
     "DEFAULTTIMEFORMATLOCALE": "client",
     "DEFAULTTIMEZONE": "client",
     "DEFAULTUSERGROUP": "__SystemUsers",
-    "DEFINITIONS": {},
+    "DEFINITIONS": {
+        "PLC1.E_RegulatorMode": {
+            "attributes": {
+                "generate_implicit_init_function": "",
+                "qualified_only": "",
+                "strict": ""
+            },
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "options": [
+                {
+                    "label": "eDisabled",
+                    "value": 0
+                },
+                {
+                    "label": "ePID",
+                    "value": 1
+                },
+                {
+                    "label": "eCascade",
+                    "value": 2
+                }
+            ],
+            "type": "integer"
+        }
+    },
     "DEFLATECOMPRESSIONLEVEL": 5,
     "DIAGNOSTICS_DOMAINS": [],
     "DISABLED_CONFIGURATION_HINTS": [],
@@ -2545,6 +2573,16 @@
             },
             "USEMAPPING": true
         },
+        "PLC1.MAIN.eRegulatorMode": {
+            "ACCESS": 3,
+            "DOMAIN": "ADS",
+            "DYNAMIC": true,
+            "MAPPING": "PLC1::MAIN::eRegulatorMode",
+            "SCHEMA": {
+                "$ref": "tchmi:server#/definitions/PLC1.E_RegulatorMode"
+            },
+            "USEMAPPING": true
+        },
         "PLC1.MAIN.fHMI_positionScale": {
             "ACCESS": 3,
             "DOMAIN": "ADS",
@@ -2579,6 +2617,16 @@
             "MAPPING": "PLC1::MAIN::fTest",
             "SCHEMA": {
                 "$ref": "tchmi:general#/definitions/REAL"
+            },
+            "USEMAPPING": true
+        },
+        "PLC1.MAIN.fX_SP": {
+            "ACCESS": 3,
+            "DOMAIN": "ADS",
+            "DYNAMIC": true,
+            "MAPPING": "PLC1::MAIN::fX_SP",
+            "SCHEMA": {
+                "$ref": "tchmi:general#/definitions/LREAL"
             },
             "USEMAPPING": true
         },
@@ -3939,9 +3987,11 @@
                 "PLC1.MAIN.bHMI_ForceStateVariables": 3,
                 "PLC1.MAIN.bRunOnlyOnce": 3,
                 "PLC1.MAIN.bStart": 3,
+                "PLC1.MAIN.eRegulatorMode": 3,
                 "PLC1.MAIN.fHMI_positionScale": 3,
                 "PLC1.MAIN.fInputForce": 3,
                 "PLC1.MAIN.fTest": 3,
+                "PLC1.MAIN.fX_SP": 3,
                 "PLC1.MAIN.fbInvertedPendulum.stStateVariables.fTheta": 3,
                 "PLC1.MAIN.fbInvertedPendulum.stStateVariables.fX": 3,
                 "PLC1.MAIN.stHMI_ForcedStateVariables.fTheta": 3,

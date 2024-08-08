@@ -64,7 +64,14 @@
   ],
   "userFunctions": [],
   "symbols": {
-    "internal": {},
+    "internal": {
+      "toggleGroup": {
+        "value": 0,
+        "type": "tchmi:general#/definitions/INT",
+        "persist": false,
+        "readonly": false
+      }
+    },
     "themedResources": {}
   },
   "trigger": [],

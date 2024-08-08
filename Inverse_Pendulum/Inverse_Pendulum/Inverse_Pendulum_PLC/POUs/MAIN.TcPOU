@@ -3,15 +3,14 @@
   <POU Name="MAIN" Id="{3ed1aa7e-7f41-4725-b882-9858b51c591a}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	fInputForce : LREAL := 0.0;
-	fX_SP : LREAL := 0.0;
-	fThetaSP : LREAL := 0.0;
-	
+	//HMI stuff
 	bHMI_ForceStateVariables : BOOL := FALSE;
 	stHMI_ForcedStateVariables : ST_StateVariables;
-	stStateVariables : ST_StateVariables;
+	fHMI_positionScale : LREAL; //scaling the displacement of the cart in HMI. There is probably a better way to do this.
 	
 	//Initialize simulator
+	fInputForce : LREAL := 0.0;
+	stStateVariables : ST_StateVariables;
 	stInitialStateVariables : ST_StateVariables := (fX := 0.0, fXD := 0.0, fTheta := 0.000, fThetaD := 0.0);
 	fbInvertedPendulum : FB_InvertedPendulum(
 		fMassPendulum := 1.0, 
@@ -20,8 +19,14 @@ VAR
 		stInitialStateVariables := stInitialStateVariables,
 		nCycleTimeMs:= 1);
 		
+	//Regulator
+	fX_SP : LREAL := 0.0;
+	fThetaSP : LREAL := 0.0;
+	eRegulatorMode: E_RegulatorMode := E_RegulatorMode.eDisabled;
+		
 	//PID Controller for X (Outer loop)
-		stPID_X_settings : ST_CTRL_PID_PARAMS := (
+	ePID_X_eMode : E_CTRL_MODE;
+	stPID_X_settings : ST_CTRL_PID_PARAMS := (
 		tCtrlCycleTime := T#10MS,
 		tTaskCycleTime := T#1MS, 
 		fKp := 0.2,  	 //P
@@ -35,9 +40,9 @@ VAR
 		bARWOnIPartOnly := FALSE);
 	fbPID_X : FB_CTRL_PID;
 	
-
 	//PID Controller for theta (Inner loop)
-	stPID_settings : ST_CTRL_PID_PARAMS := (
+	ePID_Theta_eMode : E_CTRL_MODE;
+	stPID_Theta_settings : ST_CTRL_PID_PARAMS := (
 		tCtrlCycleTime := T#1MS, 
 		tTaskCycleTime := T#1MS, 
 		fKp := 200,  //P
@@ -49,27 +54,40 @@ VAR
 		bPInTheFeedbackPath := FALSE,
 		bDInTheFeedbackPath := FALSE,
 		bARWOnIPartOnly := FALSE);
-	fbPID : FB_CTRL_PID;
-	
-	fHMI_positionScale : LREAL; //scaling the displacement of the cart in HMI. There is probably a better way to do this.
+	fbPID_Theta : FB_CTRL_PID;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[stStateVariables := fbInvertedPendulum.Simulate(fForce := fInputForce);
+      <ST><![CDATA[CASE eRegulatorMode OF
+	E_RegulatorMode.eDisabled:
+		ePID_X_eMode := E_CTRL_MODE.eCTRL_MODE_IDLE;
+		ePID_Theta_eMode := E_CTRL_MODE.eCTRL_MODE_IDLE;
+		
+	E_RegulatorMode.ePID:
+		ePID_X_eMode := E_CTRL_MODE.eCTRL_MODE_MANUAL;
+		ePID_Theta_eMode := E_CTRL_MODE.eCTRL_MODE_ACTIVE;
+			
+	E_RegulatorMode.eCascade:
+		ePID_X_eMode := E_CTRL_MODE.eCTRL_MODE_ACTIVE;
+		ePID_Theta_eMode := E_CTRL_MODE.eCTRL_MODE_ACTIVE;
+END_CASE
 
 fbPID_X(
 	fSetpointValue := fX_SP, 
-	fActualValue := stStateVariables.fX, 
-	eMode := eCTRL_MODE_ACTIVE, 
+	fActualValue := stStateVariables.fX,
+	fManSyncValue := 0.0,
+	eMode := ePID_X_eMode, 
 	stParams := stPID_X_settings);
 	fThetaSP := fbPID_X.fOut;
 
-fbPID(
+fbPID_Theta(
 	fSetpointValue := fThetaSP, 
 	fActualValue := stStateVariables.fTheta, 
-	eMode := eCTRL_MODE_ACTIVE, 
-	stParams := stPID_settings);
-	fInputForce := fbPID.fOut*-1;
+	eMode := ePID_Theta_eMode, 
+	stParams := stPID_Theta_settings);
+	fInputForce := fbPID_Theta.fOut*-1;
+	
+stStateVariables := fbInvertedPendulum.Simulate(fForce := fInputForce);
 
 IF bHMI_ForceStateVariables THEN
 	fbInvertedPendulum.ForceStateVariables(stNewStateVariables := stHMI_ForcedStateVariables);
